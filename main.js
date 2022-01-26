@@ -6,9 +6,11 @@ let frames = 0;
 let requestId;
 
 const enemies = [];
-const imagesEnemiesLeft = 'assets/images/defenderLeft.png';
-const imagesEnemiesRight = 'assets/images/defenderRight.png';
+const imagesEnemies = ['assets/images/defenderLeft.png', 'assets/images/defenderRight.png', 'assets/images/pokeball.png'];
 let bullets = [];
+let lives = 3;
+let time = 35;
+let intervalId = null
 
 class Background {
     constructor() {
@@ -16,11 +18,24 @@ class Background {
         this.y = 0;
         this.width = canvas.width;
         this.height = canvas.height;
-        this.image = new Image();
-        this.image.src = "assets/images/pub.png"
+        this.image1 = new Image();
+        this.image1.src = "assets/images/pub.png"
+        this.image2 = new Image();
+        this.image2.src = "assets/images/gameOver.jpeg"
+        this.image3 = new Image();
+        this.image3.src = "assets/images/youWin.jpeg"
     }
     draw() {
-        ctx.drawImage( this.image, this.x, this.y, this.width, this.height );
+        ctx.drawImage( this.image1, this.x, this.y, this.width, this.height );
+    }
+    gameOver() {
+        clearInterval(intervalId)
+        ctx.font = "80px Century Gothic";
+        ctx.fillText("Jesus is dead!", 325, 150)
+        ctx.drawImage(this.image2, 50, 300, 900, 500)
+    }
+    youWin(){
+        ctx.drawImage(this.image3, 50, 300, 900, 500);
     }
 }
 
@@ -38,10 +53,10 @@ class Character {
     }
     collision( item ) {
         return(
-            this.x < item.x + item.width &&
-            this.x + this.width > item.x &&
-            this.y < item.y + item.height &&
-            this.y + this.height > this.y
+            this.x < item.position.x + item.width &&
+            this.x + this.width > item.position.x &&
+            this.y < item.position.y + item.height &&
+            this.y + this.height > item.position.y
         )
     }
 }
@@ -54,6 +69,14 @@ class HolyGrail extends Character {
     }
     draw() {
         ctx.drawImage( this.image, this.x, this.y, this.width, this.height );
+    }
+    collision( item ) {
+        return(
+            this.x < item.position.x + item.width &&
+            this.x + this.width > item.position.x &&
+            this.y < item.position.y + item.height &&
+            this.y + this.height > item.position.y
+        )
     }
 }
 
@@ -70,7 +93,7 @@ class Defender extends Character {
     draw() {
         switch (this.direction) {
             default:
-                ctx.drawImage( this.image1, this.x, this.y, this.width, this.height );
+                ctx.drawImage( this.image2, this.x, this.y, this.width, this.height );
                 break;
             case 'right':
                 ctx.drawImage( this.image1, this.x, this.y, this.width, this.height );
@@ -81,9 +104,31 @@ class Defender extends Character {
     }
 }
 
-class Attacker extends Character {
-    constructor( x, y, w, h, img) {
-        super( x, y, w, h, img )
+class Attacker {
+    constructor( w, h, speedX, speedY) {
+        this.width = w;
+        this.height = h;
+        this.image1 = new Image();
+        this.image1.src = 'assets/images/defenderLeft.png';
+        this.image2 = new Image();
+        this.image2.src = 'assets/images/defenderRight.png';
+        this.position = {
+            x: 0,
+            y: Math.floor(Math.random() * (canvas.height - this.height))
+        }
+        this.speed = {
+            x: speedX,
+            y: (Math.random() > 0.5 ? 1 : -1) * speedY
+        }
+    }
+    draw() {
+        this.position.x += this.speed.x;
+        this.position.y += this.speed.y;
+        if(this.position.x > 0){
+            ctx.drawImage(this.image1, this.position.x, this.position.y, this.width, this.height);
+        } else if(this.position.x) {
+            ctx.drawImage(this.image2, this.position.x, this.position.y, this.width, this.height);
+        }
     }
 }
 
@@ -123,12 +168,19 @@ class Bullet {
                 break;
         }
     }
+    collision( item ) {
+        return(
+            this.x < item.position.x + item.width &&
+            this.x + this.width > item.position.x &&
+            this.y < item.position.y + item.height &&
+            this.y + this.height > item.position.y
+        )
+    }
 }
 
 function drawBullets() {
     bullets.forEach((bullet, index) => {
         bullet.draw()
-
         // Sacar las balas del canvas
         if (bullet.x <= 0 || bullet.x + bullet.width >= 1000) {
             bullets.splice(index, 1)
@@ -138,70 +190,95 @@ function drawBullets() {
     });
 }
 
+function generarAttackers() {
+    if (frames % 100 === 0 || frames % 600 === 0) {
+        const attacker = new Attacker(80, 80, 2, 2)
+        enemies.push(attacker)
+    }
+    enemies.forEach((attacker, attacker_index) => {
+        attacker.draw()
+        if(holy.collision(attacker)) {
+            requestAnimationFrame = undefined
+            fondo.gameOver()
+        }
+        if(defender.collision(attacker)) {
+            enemies.splice(attacker_index, 1);
+            lives -= lives;
+            if (lives = 0) {
+                requestAnimationFrame = undefined
+                fondo.gameOver()
+            }
+        }
+        bullets.forEach((bull, bull_index) => {
+            if(bull.collision(attacker)) {
+                enemies.splice(attacker_index, 1)
+                bullets.splice(bull_index, 1)
+            }
+        });
+        if(attacker.position.x < 0 || attacker.position.x + attacker.width >= canvas.width ) {
+            attacker.speed.x = -attacker.speed.x
+        } else if(attacker.position.y < 0 || attacker.position.y + attacker.height >= canvas.height) {
+            attacker.speed.y = -attacker.speed.y
+        }
+    });
+}
+
+function winGame() {
+    if(time === 0) {
+        requestAnimationFrame = undefined
+        fondo.youWin()
+    }
+}
+
+winGame()
+
 const fondo = new Background();
 const holy = new HolyGrail( 500, 400, 58, 70 );
 const defender = new Defender( 500, 600, 85, 130 );
 
-
-function generarAttackers() {
-    // if (frames % 300 === 0 || frames % 600 === 0 || frames % 1200 === 0) {
-        // let imgRend = Math.floor(Math.random() * enemies.length);
-        // let xPos = Math.floor(Math.random() * (1 - 1000)) + 1;
-        // let yPos = Math.floor(Math.random() * (1 - 800)) + 1;
-        // const attackerR = new Attacker(xPos, yPos, 50, 50, imagesEnemiesRight[imgRend])
-        // const attackerL = new Attacker(xPos, yPos, 50, 50, imagesEnemiesLeft[imgRend])
-        //enemies.push(attackerR)
-        //enemies.push(attackerL)
-    // }
-    // console.log(enemies);
-}
-
-function drawAttackers() {
-    enemies.forEach((enemy, index) => {
-        attackerR.draw()
-        attackerL.draw()
-    })
-}
-
 function startCanvas() {
     frames++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    fondo.draw()
-    holy.draw()
-    defender.draw()
-    drawBullets()
-    generarAttackers()
-    requestAnimationFrame(startCanvas)
-    // if(requestId) {
-    //     requestId = requestAnimationFrame(startCanvas)
-    // }
+    fondo.draw();
+    holy.draw();
+    defender.draw();
+    drawBullets();
+    generarAttackers();
+    if(requestId) {
+        requestId = requestAnimationFrame(startCanvas)
+    }
 }
 
-startCanvas()
+function startGame() {
+    requestId = requestAnimationFrame(startCanvas);
+    intervalId = setInterval(() => {
+        time--;
+        console.log(time);
+    }, 1000)
+}
 
-// function startGame() {
-//     requestedId = requestAnimationFrame(startCanvas)
-// }
+startGame()
+
 addEventListener('keydown', (e) => {
     // Left
     if(e.keyCode === 65) {
         defender.direction = 'left';
-        defender.x -= 20;
+        defender.x -= 30;
     }
     // Right
     if(e.keyCode === 68) {
         defender.direction = 'right';
-        defender.x += 20;
+        defender.x += 30;
     }
     // Up
     if(e.keyCode === 87) {
         defender.direction = 'up';
-        defender.y -= 20;
+        defender.y -= 30;
     }
     // Down
     if(e.keyCode === 83) {
         defender.direction = 'down';
-        defender.y += 20;
+        defender.y += 30;
     }
     // Shot
     if(e.keyCode === 75) {
@@ -209,6 +286,7 @@ addEventListener('keydown', (e) => {
             console.log('No hay pescados');
         } else {
             const bullet = new Bullet(defender.x, defender.y, defender.direction);
+            console.log(bullet);
             bullets.push(bullet)
         }
     }
