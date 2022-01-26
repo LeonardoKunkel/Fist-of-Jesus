@@ -8,7 +8,6 @@ let requestId;
 const enemies = [];
 const imagesEnemies = ['assets/images/defenderLeft.png', 'assets/images/defenderRight.png', 'assets/images/pokeball.png'];
 let bullets = [];
-let lives = 3;
 let time = 35;
 let intervalId = null
 
@@ -35,6 +34,7 @@ class Background {
         ctx.drawImage(this.image2, 50, 300, 900, 500)
     }
     youWin(){
+        clearInterval(intervalId)
         ctx.drawImage(this.image3, 50, 300, 900, 500);
     }
 }
@@ -83,12 +83,13 @@ class HolyGrail extends Character {
 class Defender extends Character {
     constructor( x, y, w, h ) {
         super( x, y, w, h )
-        this.image1 = new Image()
-        this.image1.src = "assets/images/jesusRight.png"
-        this.image2 = new Image()
-        this.image2.src = "assets/images/jesusLeft.png"
+        this.image1 = new Image();
+        this.image1.src = "assets/images/jesusRight.png";
+        this.image2 = new Image();
+        this.image2.src = "assets/images/jesusLeft.png";
         this.image = this.image1;
-        this.direction = ''
+        this.direction = '';
+        this.lives = 3;
     }
     draw() {
         switch (this.direction) {
@@ -203,11 +204,11 @@ function generarAttackers() {
         }
         if(defender.collision(attacker)) {
             enemies.splice(attacker_index, 1);
-            lives -= lives;
-            if (lives = 0) {
-                requestAnimationFrame = undefined
-                fondo.gameOver()
-            }
+            defender.lives -= 1;
+        }
+        if (defender.lives < 0) {
+            requestAnimationFrame = undefined
+            fondo.gameOver()
         }
         bullets.forEach((bull, bull_index) => {
             if(bull.collision(attacker)) {
@@ -224,10 +225,7 @@ function generarAttackers() {
 }
 
 function winGame() {
-    if(time === 0) {
-        requestAnimationFrame = undefined
-        fondo.youWin()
-    }
+    
 }
 
 winGame()
@@ -254,6 +252,10 @@ function startGame() {
     intervalId = setInterval(() => {
         time--;
         console.log(time);
+        if(time < 0) {
+            requestAnimationFrame = undefined
+            fondo.youWin()
+        }
     }, 1000)
 }
 
