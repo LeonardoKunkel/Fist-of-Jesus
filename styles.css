@@ -1,8 +1,32 @@
-.mainMenu {
-    
+body {
+    background-color: black;
+}
+.mainTitle {
+    display: flex;
+    justify-content: center;
+}
+.sbtn {
+    text-decoration: none;
+    text-align: center;
+    padding: 400px 20px;
+    font-family: Alagard;
+    font-size: 20px;
+    color: #ffffff;
+    background-color: #a5940c;
+    border-radius: 6px;
+    border: 2px solid #ebd763;
+}
+.texto {
+    font-size: 30px;
+    text-align: center;
+    margin: 50px auto;
+}
+.keys {
+    display: flex;
+    align-content: center;
 }
 .supercanvas {
-    position: relative;
+    position: flex;
     align-content: center;
 }
 @font-face {
