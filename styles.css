@@ -2,5 +2,14 @@
     
 }
 .supercanvas {
-    margin-top: 200px;
+    position: relative;
+    align-content: center;
+}
+@font-face {
+    font-family: Alagard;
+    src: url('./fonts/alagard.ttf');
+}
+html {
+    color: aliceblue;
+    font-family: Alagard;
 }

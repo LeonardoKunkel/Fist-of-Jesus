@@ -18,7 +18,7 @@ class Background {
         this.width = canvas.width;
         this.height = canvas.height;
         this.image1 = new Image();
-        this.image1.src = "assets/images/pub.png"
+        this.image1.src = "assets/images/background.png"
         this.image2 = new Image();
         this.image2.src = "assets/images/gameOver.jpeg"
         this.image3 = new Image();
@@ -29,7 +29,7 @@ class Background {
     }
     gameOver() {
         clearInterval(intervalId)
-        ctx.font = "80px Century Gothic";
+        ctx.font = "80px Alagard";
         ctx.fillText("Jesus is dead!", 325, 150)
         ctx.drawImage(this.image2, 50, 300, 900, 500)
     }
@@ -87,7 +87,10 @@ class Defender extends Character {
         this.image1.src = "assets/images/jesusRight.png";
         this.image2 = new Image();
         this.image2.src = "assets/images/jesusLeft.png";
-        this.image = this.image1;
+        this.image3 = new Image();
+        this.image3.src = "assets/images/jesusUp.png";
+        this.image4 = new Image();
+        this.image4.src = "assets/images/jesusDown.png";
         this.direction = '';
         this.lives = 3;
     }
@@ -101,6 +104,13 @@ class Defender extends Character {
                 break;
             case 'left':
                 ctx.drawImage( this.image2, this.x, this.y, this.width, this.height );
+                break;
+            case 'up':
+                ctx.drawImage( this.image3, this.x, this.y, this.width, this.height );
+                break;
+            case 'down':
+                ctx.drawImage( this.image4, this.x, this.y, this.width, this.height );
+                break;
         }
     }
 }
@@ -199,40 +209,34 @@ function generarAttackers() {
     enemies.forEach((attacker, attacker_index) => {
         attacker.draw()
         if(holy.collision(attacker)) {
-            requestAnimationFrame = undefined
-            fondo.gameOver()
+            requestAnimationFrame = undefined;
+            fondo.gameOver();
         }
         if(defender.collision(attacker)) {
             enemies.splice(attacker_index, 1);
             defender.lives -= 1;
         }
         if (defender.lives < 0) {
-            requestAnimationFrame = undefined
-            fondo.gameOver()
+            requestAnimationFrame = undefined;
+            fondo.gameOver();
         }
         bullets.forEach((bull, bull_index) => {
             if(bull.collision(attacker)) {
-                enemies.splice(attacker_index, 1)
-                bullets.splice(bull_index, 1)
+                enemies.splice(attacker_index, 1);
+                bullets.splice(bull_index, 1);
             }
         });
         if(attacker.position.x < 0 || attacker.position.x + attacker.width >= canvas.width ) {
-            attacker.speed.x = -attacker.speed.x
+            attacker.speed.x = -attacker.speed.x;
         } else if(attacker.position.y < 0 || attacker.position.y + attacker.height >= canvas.height) {
-            attacker.speed.y = -attacker.speed.y
+            attacker.speed.y = -attacker.speed.y;
         }
     });
 }
 
-function winGame() {
-    
-}
-
-winGame()
-
 const fondo = new Background();
 const holy = new HolyGrail( 500, 400, 58, 70 );
-const defender = new Defender( 500, 600, 85, 130 );
+const defender = new Defender( 500, 600, 95, 120 );
 
 function startCanvas() {
     frames++;
@@ -243,7 +247,7 @@ function startCanvas() {
     drawBullets();
     generarAttackers();
     if(requestId) {
-        requestId = requestAnimationFrame(startCanvas)
+        requestId = requestAnimationFrame(startCanvas);
     }
 }
 
@@ -251,7 +255,6 @@ function startGame() {
     requestId = requestAnimationFrame(startCanvas);
     intervalId = setInterval(() => {
         time--;
-        console.log(time);
         if(time < 0) {
             requestAnimationFrame = undefined
             fondo.youWin()
@@ -259,7 +262,11 @@ function startGame() {
     }, 1000)
 }
 
-startGame()
+window.onload = () => {
+    document.getElementById('start-button').onclick = () => {
+        startGame();
+    }
+}
 
 addEventListener('keydown', (e) => {
     // Left
@@ -284,11 +291,10 @@ addEventListener('keydown', (e) => {
     }
     // Shot
     if(e.keyCode === 75) {
-        if(bullets.length >= 7) {
+        if(bullets.length >= 3) {
             console.log('No hay pescados');
         } else {
             const bullet = new Bullet(defender.x, defender.y, defender.direction);
-            console.log(bullet);
             bullets.push(bullet)
         }
     }
