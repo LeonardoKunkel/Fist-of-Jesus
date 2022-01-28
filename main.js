@@ -5,6 +5,9 @@ const ctx = canvas.getContext( "2d" );
 let frames = 0;
 let requestId;
 
+let mainAudio = new Audio();
+mainAudio.src = 'assets/audio/mainTheme.mp3'
+
 const enemies = [];
 const imagesEnemies = [
     'assets/images/zombie1.png',
@@ -17,7 +20,7 @@ const imagesEnemies = [
     'assets/images/zombie8.png',
 ];
 let bullets = [];
-let time = 45;
+let time = 15;
 let intervalId = null
 
 class Background {
