@@ -8,7 +8,7 @@ let requestId;
 const enemies = [];
 const imagesEnemies = ['assets/images/defenderLeft.png', 'assets/images/defenderRight.png', 'assets/images/pokeball.png'];
 let bullets = [];
-let time = 35;
+let time = 45;
 let intervalId = null
 
 class Background {
@@ -23,18 +23,31 @@ class Background {
         this.image2.src = "assets/images/gameOver.jpeg"
         this.image3 = new Image();
         this.image3.src = "assets/images/youWin.jpeg"
+        this.win = false
     }
     draw() {
-        ctx.drawImage( this.image1, this.x, this.y, this.width, this.height );
+        if(this.win) {
+            ctx.fillStyle = "white"
+            ctx.font = "80px Alagard";
+            ctx.fillText("Jesus stand alive!", 325, 150);
+            ctx.drawImage(this.image3, 50, 300, 900, 500);
+            clearInterval(intervalId)
+        } else {
+            ctx.drawImage( this.image1, this.x, this.y, this.width, this.height );
+        }
     }
     gameOver() {
         clearInterval(intervalId)
+        ctx.fillStyle = "white"
         ctx.font = "80px Alagard";
         ctx.fillText("Jesus is dead!", 325, 150)
         ctx.drawImage(this.image2, 50, 300, 900, 500)
     }
-    youWin(){
-        clearInterval(intervalId)
+    youWin() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white"
+        ctx.font = "80px Alagard";
+        ctx.fillText("Jesus stand alive!", 325, 150);
         ctx.drawImage(this.image3, 50, 300, 900, 500);
     }
 }
@@ -234,20 +247,35 @@ function generarAttackers() {
     });
 }
 
+function drawTimeAndLives() {
+    ctx.fillStyle = "white";
+    ctx.font = "32px Alagard"
+    ctx.fillText(`Lives: ${defender.lives}`, 50, 35)
+    ctx.fillStyle = "white";
+    ctx.font = "32px Alagard"
+    ctx.fillText(`Time: ${time}`, 800, 35)
+}
+
 const fondo = new Background();
 const holy = new HolyGrail( 500, 400, 58, 70 );
 const defender = new Defender( 500, 600, 95, 120 );
 
 function startCanvas() {
-    frames++;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    fondo.draw();
-    holy.draw();
-    defender.draw();
-    drawBullets();
-    generarAttackers();
-    if(requestId) {
-        requestId = requestAnimationFrame(startCanvas);
+    if(fondo.win) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fondo.draw();
+    } else {
+        frames++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fondo.draw();
+        holy.draw();
+        defender.draw();
+        drawTimeAndLives()
+        drawBullets();
+        generarAttackers();
+        if(requestId) {
+            requestId = requestAnimationFrame(startCanvas);
+        }
     }
 }
 
@@ -255,9 +283,10 @@ function startGame() {
     requestId = requestAnimationFrame(startCanvas);
     intervalId = setInterval(() => {
         time--;
-        if(time < 0) {
-            requestAnimationFrame = undefined
-            fondo.youWin()
+        if(time <= 0) {
+            fondo.win = true
+            clearInterval(requestId = undefined)
+            // requestAnimationFrame = undefined
         }
     }, 1000)
 }
