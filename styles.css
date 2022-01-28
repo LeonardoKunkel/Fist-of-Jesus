@@ -19,7 +19,6 @@ body {
 .texto {
     font-size: 30px;
     text-align: center;
-    margin: 50px auto;
 }
 .keys {
     display: flex;

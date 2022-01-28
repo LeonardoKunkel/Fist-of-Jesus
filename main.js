@@ -6,7 +6,16 @@ let frames = 0;
 let requestId;
 
 const enemies = [];
-const imagesEnemies = ['assets/images/defenderLeft.png', 'assets/images/defenderRight.png', 'assets/images/pokeball.png'];
+const imagesEnemies = [
+    'assets/images/zombie1.png',
+    'assets/images/zombie2.png',
+    'assets/images/zombie3.png',
+    'assets/images/zombie4.png',
+    'assets/images/zombie5.png',
+    'assets/images/zombie6.png',
+    'assets/images/zombie7.png',
+    'assets/images/zombie8.png',
+];
 let bullets = [];
 let time = 45;
 let intervalId = null
@@ -129,13 +138,11 @@ class Defender extends Character {
 }
 
 class Attacker {
-    constructor( w, h, speedX, speedY) {
+    constructor( w, h, speedX, speedY, img) {
         this.width = w;
         this.height = h;
         this.image1 = new Image();
-        this.image1.src = 'assets/images/defenderLeft.png';
-        this.image2 = new Image();
-        this.image2.src = 'assets/images/defenderRight.png';
+        this.image1.src = img;
         this.position = {
             x: 0,
             y: Math.floor(Math.random() * (canvas.height - this.height))
@@ -148,11 +155,7 @@ class Attacker {
     draw() {
         this.position.x += this.speed.x;
         this.position.y += this.speed.y;
-        if(this.position.x > 0){
-            ctx.drawImage(this.image1, this.position.x, this.position.y, this.width, this.height);
-        } else if(this.position.x) {
-            ctx.drawImage(this.image2, this.position.x, this.position.y, this.width, this.height);
-        }
+        ctx.drawImage(this.image1, this.position.x, this.position.y, this.width, this.height);
     }
 }
 
@@ -215,8 +218,9 @@ function drawBullets() {
 }
 
 function generarAttackers() {
-    if (frames % 100 === 0 || frames % 600 === 0) {
-        const attacker = new Attacker(80, 80, 2, 2)
+    if (frames % 85 === 0 || frames % 600 === 0) {
+        let imgR = Math.floor(Math.random() * imagesEnemies.length);
+        const attacker = new Attacker(80, 80, 2, 2, imagesEnemies[imgR]);
         enemies.push(attacker)
     }
     enemies.forEach((attacker, attacker_index) => {
