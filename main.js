@@ -20,7 +20,7 @@ const imagesEnemies = [
     'assets/images/zombie8.png',
 ];
 let bullets = [];
-let time = 15;
+let time = 45;
 let intervalId = null
 
 class Background {
